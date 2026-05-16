@@ -61,3 +61,6 @@ PHASE 3:
 1. Add a margin requirment check. If the margin is insufficient then don't place an order and log it as "Order not placed due to insufficient margin". Use the inbuilt KITE function. 
 2. Whenever an order is placed, check the order status after 5 seconds and if the status is complete then it means the order has been placed successfully and we can proceed to the next step. If the status is rejected, then that means the order is rejected. Retry twice. If it is still rejected then Log "Max Retry reached" and stop the algo. 
 3. For any failed order max retry is 2. If it fails after 2 times. Stop the entire algo for the day. 
+
+<!-- PHASE 4: 
+Push Code to github. Done. -->
