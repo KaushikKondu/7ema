@@ -1,0 +1,29 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environments
+venv/
+env/
+.venv/
+.env/
+
+# Credentials and sensitive data
+auth/token.txt
+auth/credentials.json
+
+# Logs
+*.log
+
+# Mac OS
+.DS_Store
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Project specific
+.planning/

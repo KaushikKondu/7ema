@@ -1,0 +1,5 @@
+kiteconnect>=5.2.0
+pyotp
+pandas
+requests
+TA-Lib
