@@ -21,7 +21,15 @@ def fetch_historical_data(instrument_token: int, interval: str, candles: int) ->
         days_needed = candles
         
     to_date = datetime.datetime.now()
-    from_date = to_date - datetime.timedelta(days=int(days_needed * 1.5)) # x1.5 to account for weekends/holidays
+    total_days = int(days_needed * 1.5) # x1.5 to account for weekends/holidays
+    
+    # Cap total_days based on Kite API limits to prevent 'interval exceeds max limit' error
+    if interval == '60minute' and total_days > 395:
+        total_days = 395
+    elif interval == '15minute' and total_days > 195:
+        total_days = 195
+        
+    from_date = to_date - datetime.timedelta(days=total_days)
 
     logger.info(f"Fetching {interval} data for token {instrument_token} from {from_date.date()} to {to_date.date()}")
     try:
@@ -57,7 +65,8 @@ def get_1hr_bias() -> str:
     Returns 'BEARISH' if the latest 1hr candle is red (close < open).
     Returns 'NEUTRAL' otherwise.
     """
-    df_1h = fetch_historical_data(NIFTY_50_TOKEN, '60minute', WARMUP_CANDLES)
+    # Fetch 100 candles instead of WARMUP_CANDLES since we only need the most recent data
+    df_1h = fetch_historical_data(NIFTY_50_TOKEN, '60minute', 100)
     if df_1h.empty:
         return 'NEUTRAL'
         

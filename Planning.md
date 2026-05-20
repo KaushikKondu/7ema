@@ -62,5 +62,8 @@ PHASE 3:
 2. Whenever an order is placed, check the order status after 5 seconds and if the status is complete then it means the order has been placed successfully and we can proceed to the next step. If the status is rejected, then that means the order is rejected. Retry twice. If it is still rejected then Log "Max Retry reached" and stop the algo. 
 3. For any failed order max retry is 2. If it fails after 2 times. Stop the entire algo for the day. 
 
-<!-- PHASE 4: 
-Push Code to github. Done. -->
+PHASE 4:
+1. Create a github workflow file for deploying the algo to aws instance. 
+   Use my reference file. Make sure you change the instance timezone to IST through
+   command line.
+   

@@ -1,0 +1,57 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            # Set timezone to IST
+            sudo timedatectl set-timezone Asia/Kolkata
+
+            # Install git if not already installed
+            sudo dnf install -y git
+
+            mkdir -p /home/ec2-user/algo_workspace
+            cd /home/ec2-user/algo_workspace
+            if [ ! -d "7ema" ]; then
+              git clone git@github.com:KaushikKondu/7ema.git
+            fi
+            cd 7ema
+            git reset --hard
+            git pull origin main
+
+            # Recreate credentials.json securely
+            mkdir -p auth
+            echo '${{ secrets.APP_CREDENTIALS }}' > auth/credentials.json
+
+            # Install dependencies
+            sudo dnf install python3-pip -y
+            pip3 install -r requirements.txt --upgrade
+
+            sudo dnf install cronie -y
+            sudo systemctl enable crond
+            sudo systemctl start crond
+
+            # Ensure logs directory exists
+            mkdir -p /home/ec2-user/algo_workspace/7ema/logs
+
+            # Single atomic cron update — removes ALL old 7ema jobs, then adds new ones
+            CRON_JOB="20 9 * * 1-5 cd /home/ec2-user/algo_workspace/7ema && /usr/bin/python3 main.py >> /home/ec2-user/algo_workspace/7ema/logs/\$(date +\%Y-\%m-\%d)_kite_cron.log 2>&1"
+            CRONKILLER_JOB="30 15 * * 1-5 /usr/bin/pkill -f 'main.py' -P \$(pgrep -f '7ema/main.py')"
+
+            (crontab -l 2>/dev/null | grep -v '7ema'; echo "$CRON_JOB"; echo "$CRONKILLER_JOB") | crontab -
